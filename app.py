@@ -17,7 +17,7 @@ if not st.session_state.usuario:
         if email.strip():
             st.session_state.usuario = email.strip().lower()
             st.success(f"✅ Bienvenido, {st.session_state.usuario}")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.warning("⚠️ Debes introducir un correo válido.")
 else:
