@@ -9,5 +9,5 @@ def mostrar():
     st.session_state.clear()
 
     # Rerun para volver a login
-    st.experimental_rerun()
+    st.rerun()
 
