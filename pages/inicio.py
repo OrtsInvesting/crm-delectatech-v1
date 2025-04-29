@@ -1,6 +1,9 @@
 import streamlit as st
 
 def mostrar():
+    if "usuario_data" not in st.session_state:
+        st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
+        
     st.title("🏠 Inicio")
 
     if "usuario_data" not in st.session_state or st.session_state.usuario_data["bd"].empty:
