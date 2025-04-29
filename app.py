@@ -1,15 +1,15 @@
 import streamlit as st
 
-# Importar tus módulos personalizados (de la carpeta /pages/)
+# ✅ Importar las páginas desde la carpeta "pages"
 from pages import inicio, contactos, listas, subidas, dashboard, ajustes, cerrar_sesion
 
 st.set_page_config(page_title="CRM Leads Delectatech", layout="wide")
 
-# Inicializar estado de usuario
+# ✅ Iniciar sesión del usuario
 if "usuario" not in st.session_state:
     st.session_state.usuario = None
 
-# LOGIN
+# ✅ Login por email
 if not st.session_state.usuario:
     st.title("🔒 CRM Leads Delectatech - Login")
     email = st.text_input("Introduce tu correo electrónico")
@@ -21,11 +21,11 @@ if not st.session_state.usuario:
         else:
             st.warning("⚠️ Debes introducir un correo válido.")
 else:
-    # Menú lateral de navegación
+    # ✅ Menú de navegación manual
     with st.sidebar:
         st.header("🧭 Navegación")
         pagina = st.selectbox(
-            "Ir a la sección:",
+            "Selecciona una sección:",
             [
                 "🏠 Inicio",
                 "🧑‍💼 Contactos",
@@ -37,7 +37,7 @@ else:
             ]
         )
 
-    # Ruteo entre secciones
+    # ✅ Cargar la página correspondiente
     if pagina == "🏠 Inicio":
         inicio.mostrar()
     elif pagina == "🧑‍💼 Contactos":
