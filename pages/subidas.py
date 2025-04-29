@@ -5,6 +5,9 @@ import json
 from datetime import datetime
 
 def mostrar():
+    if "usuario_data" not in st.session_state:
+        st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
+        
     st.title("📂 Subida de contactos")
 
     file = st.file_uploader("📄 Sube un archivo CSV o Excel", type=["csv", "xlsx"])
