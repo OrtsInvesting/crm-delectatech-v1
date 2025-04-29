@@ -12,11 +12,9 @@ def mostrar():
     if file:
         nombres_archivos_existentes = [u["nombre_archivo"] for u in st.session_state.usuario_data["uploads"]]
 
-        # ✅ Verificar si ya existe el archivo
         if file.name in nombres_archivos_existentes:
             st.error(f"❌ Ya has subido un archivo llamado '{file.name}'. Cambia el nombre y vuelve a intentarlo.")
         else:
-            # ✅ Procesar archivo
             try:
                 if file.name.endswith(".xlsx"):
                     new_df = pd.read_excel(file)
@@ -26,7 +24,6 @@ def mostrar():
                 st.error(f"❌ Error al leer el archivo: {e}")
                 return
 
-            # ✅ Procesamiento básico
             new_df["Related to"] = new_df["Related to"].ffill()
             new_df["Nombre completo"] = new_df["Name"].fillna('') + " " + new_df["Last Name"].fillna('')
             new_df["Empresa"] = new_df["Related to"].fillna("Desconocida")
@@ -36,17 +33,13 @@ def mostrar():
                 lambda r: f'<a href="https://www.linkedin.com/sales/search/people/?keywords={r["Nombre completo"]} {r["Empresa"]}" target="_blank">🔗 Sales Nav</a>',
                 axis=1
             )
-
-            # ✅ Añadir campos adicionales
             new_df["archivo_origen"] = file.name
             new_df["Favorito"] = False
             new_df["Estado"] = "Nuevo"
             new_df["Nota"] = ""
 
-            # ✅ Agregar a la base de datos del usuario
             st.session_state.usuario_data["bd"] = pd.concat([st.session_state.usuario_data["bd"], new_df], ignore_index=True)
 
-            # ✅ Registrar el archivo subido
             st.session_state.usuario_data["uploads"].append({
                 "nombre_archivo": file.name,
                 "fecha_subida": datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -67,4 +60,3 @@ def guardar_usuario_data():
     }
     with open(user_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
-
