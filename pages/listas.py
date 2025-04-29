@@ -5,6 +5,9 @@ import os
 import json
 
 def mostrar():
+    if "usuario_data" not in st.session_state:
+        st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
+        
     st.title("📚 Mis Listas")
 
     if "usuario_data" not in st.session_state or not st.session_state.usuario_data["listas"]:
