@@ -73,7 +73,7 @@ def mostrar():
                             st.session_state.usuario_data["listas"][lista].remove(nombre_contacto)
 
                     guardar_usuario_data()
-                    st.experimental_rerun()
+                    st.rerun()
 
         guardar_usuario_data()
 
