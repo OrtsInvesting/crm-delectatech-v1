@@ -1,26 +1,31 @@
 import streamlit as st
+import os
+import json
 import pandas as pd
 
 def mostrar():
-    st.title("🏠 Inicio")
+    st.title("⚙️ Ajustes")
 
-    # Cargar la base de datos del usuario
-    if "usuario_data" not in st.session_state or st.session_state.usuario_data["bd"].empty:
-        st.info("No tienes contactos todavía. ¡Sube un archivo CSV para empezar!")
-        return
+    st.warning("⚠️ Cuidado: al resetear, perderás todos tus contactos, listas y archivos subidos.")
 
-    bd = st.session_state.usuario_data["bd"]
+    if st.button("🔄 Resetear CRM y empezar de 0"):
+        # Reiniciar los datos del usuario
+        st.session_state.usuario_data = {
+            "bd": pd.DataFrame(),
+            "listas": {},
+            "uploads": []
+        }
+        guardar_usuario_data()
+        st.success("✅ Usuario reseteado. Puedes empezar desde cero.")
+        st.experimental_rerun()
 
-    st.metric("Leads totales", len(bd))
-
-    if not bd.empty and "Empresa" in bd.columns:
-        st.metric("Empresas únicas", bd["Empresa"].nunique())
-    else:
-        st.metric("Empresas únicas", 0)
-
-    if not bd.empty and "Comentario" in bd.columns:
-        porcentaje = (bd["Comentario"] != "").mean() * 100
-        st.metric("Leads con comentario (%)", f"{porcentaje:.1f}%")
-    else:
-        st.metric("Leads con comentario (%)", "0%")
-
+def guardar_usuario_data():
+    user_file = f"data/usuarios/{st.session_state.usuario}.json"
+    os.makedirs(os.path.dirname(user_file), exist_ok=True)
+    data = {
+        "bd": st.session_state.usuario_data["bd"].to_dict(orient="records"),
+        "listas": st.session_state.usuario_data["listas"],
+        "uploads": st.session_state.usuario_data["uploads"]
+    }
+    with open(user_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
