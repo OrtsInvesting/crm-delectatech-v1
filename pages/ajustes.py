@@ -4,6 +4,9 @@ import json
 import pandas as pd
 
 def mostrar():
+    if "usuario_data" not in st.session_state:
+        st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
+        
     st.title("⚙️ Ajustes")
 
     st.warning("⚠️ Cuidado: al resetear, perderás todos tus contactos, listas y archivos subidos.")
