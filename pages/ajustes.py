@@ -17,7 +17,7 @@ def mostrar():
         }
         guardar_usuario_data()
         st.success("✅ Usuario reseteado. Puedes empezar desde cero.")
-        st.experimental_rerun()
+        st.rerun()
 
 def guardar_usuario_data():
     user_file = f"data/usuarios/{st.session_state.usuario}.json"
