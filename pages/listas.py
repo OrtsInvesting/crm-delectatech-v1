@@ -31,7 +31,7 @@ def mostrar():
                 st.markdown(f"- ⭐ **Favorito:** {'Sí' if row.get('Favorito') else 'No'}")
                 st.markdown(f"- 📝 **Nota:** {row.get('Nota', 'Sin nota')}")
 
-                # Para exportar luego a Excel
+                # Preparar fila para Excel
                 excel_data.append({
                     "Lista": nombre_lista,
                     "Nombre completo": row["Nombre completo"],
@@ -44,17 +44,17 @@ def mostrar():
                 })
 
     if excel_data:
-        if st.button("📥 Descargar Excel con todas las listas"):
-            df_export = pd.DataFrame(excel_data)
-            buffer = BytesIO()
-            df_export.to_excel(buffer, index=False, engine='openpyxl')
-            buffer.seek(0)
-            st.download_button(
-                label="Descargar archivo Excel",
-                data=buffer,
-                file_name="listas_completas.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+        st.markdown("### 📥 Exportar todas las listas")
+        buffer = BytesIO()
+        df_export = pd.DataFrame(excel_data)
+        df_export.to_excel(buffer, index=False, engine='openpyxl')
+        buffer.seek(0)
+        st.download_button(
+            label="Descargar archivo Excel",
+            data=buffer,
+            file_name="listas_completas.xlsx",
+            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        )
 
 def guardar_usuario_data():
     user_file = f"data/usuarios/{st.session_state.usuario}.json"
