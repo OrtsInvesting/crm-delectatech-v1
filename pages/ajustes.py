@@ -6,20 +6,15 @@ import pandas as pd
 def mostrar():
     if "usuario_data" not in st.session_state:
         st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
-        
+
     st.title("⚙️ Ajustes")
 
-    st.warning("⚠️ Cuidado: al resetear, perderás todos tus contactos, listas y archivos subidos.")
+    st.warning("⚠️ Esto borrará todos los datos de tu sesión (contactos, listas, archivos).")
 
-    if st.button("🔄 Resetear CRM y empezar de 0"):
-        # Reiniciar los datos del usuario
-        st.session_state.usuario_data = {
-            "bd": pd.DataFrame(),
-            "listas": {},
-            "uploads": []
-        }
+    if st.button("🔄 Resetear usuario y empezar de 0"):
+        st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
         guardar_usuario_data()
-        st.success("✅ Usuario reseteado. Puedes empezar desde cero.")
+        st.success("Usuario reseteado correctamente.")
         st.rerun()
 
 def guardar_usuario_data():
