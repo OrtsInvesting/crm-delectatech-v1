@@ -56,16 +56,28 @@ def mostrar():
                 st.session_state.usuario_data["bd"].at[idx, "Nota"] = nota
 
                 # Añadir a lista
-                listas_disponibles = list(st.session_state.usuario_data["listas"].keys()) + ["Crear nueva lista..."]
-                lista_seleccionada = st.selectbox("➕ Añadir a lista", listas_disponibles, key=f"lista_{idx}")
-                if lista_seleccionada == "Crear nueva lista...":
-                    nueva_lista = st.text_input("Nombre de nueva lista", key=f"nueva_lista_{idx}")
-                    if nueva_lista:
-                        st.session_state.usuario_data["listas"].setdefault(nueva_lista, [])
-                        st.success(f"Lista {nueva_lista} creada.")
-                else:
-                    if row["Nombre completo"] not in st.session_state.usuario_data["listas"].get(lista_seleccionada, []):
-                        st.session_state.usuario_data["listas"].setdefault(lista_seleccionada, []).append(row["Nombre completo"])
+listas_disponibles = list(st.session_state.usuario_data["listas"].keys()) + ["Crear nueva lista..."]
+lista_seleccionada = st.selectbox("➕ Seleccionar lista", listas_disponibles, key=f"lista_{idx}")
+
+# Crear nueva lista si se selecciona esa opción
+if lista_seleccionada == "Crear nueva lista...":
+    nueva_lista = st.text_input("Nombre de nueva lista", key=f"nueva_lista_{idx}")
+    if nueva_lista:
+        st.session_state.usuario_data["listas"].setdefault(nueva_lista, [])
+        guardar_usuario_data()
+        st.success(f"Lista '{nueva_lista}' creada.")
+        st.rerun()
+
+# Botón para añadir contacto a lista
+if lista_seleccionada != "Crear nueva lista..." and st.button("➕ Añadir a lista", key=f"add_{idx}"):
+    if row["Nombre completo"] not in st.session_state.usuario_data["listas"].get(lista_seleccionada, []):
+        st.session_state.usuario_data["listas"][lista_seleccionada].append(row["Nombre completo"])
+        guardar_usuario_data()
+        st.success(f"{row['Nombre completo']} añadido a la lista {lista_seleccionada}")
+        st.rerun()
+    else:
+        st.info("Este contacto ya está en esa lista.")
+
 
                 # Borrar contacto
                 if st.button(f"🗑️ Eliminar contacto {row['Nombre completo']}", key=f"del_{idx}"):
