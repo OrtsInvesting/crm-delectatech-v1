@@ -3,9 +3,14 @@ import pandas as pd
 import os
 import json
 
+
 def mostrar():
     if "usuario_data" not in st.session_state:
         st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
+
+    if "usuario" not in st.session_state:
+        st.warning("Debes iniciar sesión para ver tus contactos.")
+        return
 
     st.title("🧑‍💼 Contactos")
 
@@ -31,13 +36,11 @@ def mostrar():
             st.markdown(row["LinkedIn"], unsafe_allow_html=True)
             st.caption(row["Comentario"] if row["Comentario"] else "Sin comentario")
 
-            # ⭐ Favorito
             favorito = st.checkbox("⭐ Favorito", value=row.get("Favorito", False), key=f"fav_{idx}")
             if favorito != row.get("Favorito", False):
                 st.session_state.usuario_data["bd"].at[idx, "Favorito"] = favorito
                 guardar_usuario_data()
 
-            # 🚦 Estado
             estado = st.selectbox(
                 "🚦 Estado del contacto",
                 ["Nuevo", "Contactado", "No interesado", "En negociación", "Cerrado"],
@@ -48,13 +51,11 @@ def mostrar():
                 st.session_state.usuario_data["bd"].at[idx, "Estado"] = estado
                 guardar_usuario_data()
 
-            # 📝 Nota
             nota = st.text_area("📝 Nota interna", value=row.get("Nota", ""), key=f"nota_{idx}")
             if nota != row.get("Nota", ""):
                 st.session_state.usuario_data["bd"].at[idx, "Nota"] = nota
                 guardar_usuario_data()
 
-            # ➕ Añadir a lista
             listas_disponibles = list(st.session_state.usuario_data["listas"].keys()) + ["Crear nueva lista..."]
             lista_seleccionada = st.selectbox("📂 Seleccionar lista", listas_disponibles, key=f"lista_{idx}")
 
@@ -75,7 +76,6 @@ def mostrar():
                 else:
                     st.info("Este contacto ya está en esa lista.")
 
-            # 🗑️ Borrar contacto
             if st.button(f"🗑️ Eliminar contacto {row['Nombre completo']}", key=f"del_{idx}"):
                 nombre_contacto = row["Nombre completo"]
                 st.session_state.usuario_data["bd"].drop(idx, inplace=True)
@@ -88,6 +88,7 @@ def mostrar():
                 st.rerun()
 
     guardar_usuario_data()
+
 
 def guardar_usuario_data():
     if "usuario" not in st.session_state:
