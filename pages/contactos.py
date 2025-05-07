@@ -90,6 +90,9 @@ def mostrar():
     guardar_usuario_data()
 
 def guardar_usuario_data():
+    if "usuario" not in st.session_state:
+        return
+
     user_file = f"data/usuarios/{st.session_state.usuario}.json"
     os.makedirs(os.path.dirname(user_file), exist_ok=True)
     data = {
