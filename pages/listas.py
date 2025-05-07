@@ -1,8 +1,8 @@
 import streamlit as st
 import pandas as pd
+from io import BytesIO
 import os
 import json
-from io import BytesIO
 
 def mostrar():
     if "usuario_data" not in st.session_state:
@@ -10,53 +10,40 @@ def mostrar():
 
     st.title("📚 Mis Listas")
 
-    listas = st.session_state.usuario_data["listas"]
-    bd = st.session_state.usuario_data["bd"]
-
-    if not listas:
+    if not st.session_state.usuario_data["listas"]:
         st.info("No tienes listas creadas todavía.")
         return
 
-    excel_data = []
+    listas = st.session_state.usuario_data["listas"]
 
-    for nombre_lista, nombres_contactos in listas.items():
-        contactos_filtrados = bd[bd["Nombre completo"].isin(nombres_contactos)]
-        st.subheader(f"📋 Lista: {nombre_lista} ({len(contactos_filtrados)} contacto/s)")
+    for lista, contactos in listas.items():
+        with st.expander(f"📋 {lista} ({len(contactos)} contactos)"):
+            if contactos:
+                df_contactos = st.session_state.usuario_data["bd"].query("`Nombre completo` in @contactos")
+                st.dataframe(df_contactos[[
+                    "Nombre completo", "Cargo", "Empresa", "Email", "Estado", "Comentario", "Favorito"
+                ]])
+            else:
+                st.write("(Lista vacía)")
 
-        for idx, row in contactos_filtrados.iterrows():
-            with st.expander(f"{row['Nombre completo']} — {row['Cargo']} ({row['Empresa']})"):
-                st.markdown(row["LinkedIn"], unsafe_allow_html=True)
-                st.markdown(f"- ✉️ **Email:** {row.get('Email', 'No disponible')}")
-                st.markdown(f"- 🚦 **Estado:** {row.get('Estado', 'No definido')}")
-                st.markdown(f"- ⭐ **Favorito:** {'Sí' if row.get('Favorito') else 'No'}")
-                st.markdown(f"- 📝 **Nota:** {row.get('Nota', 'Sin nota')}")
-
-                # Preparar fila para Excel
-                excel_data.append({
-                    "Lista": nombre_lista,
-                    "Nombre completo": row["Nombre completo"],
-                    "Email": row.get("Email", ""),
-                    "Cargo": row.get("Cargo", ""),
-                    "Empresa": row.get("Empresa", ""),
-                    "Estado": row.get("Estado", ""),
-                    "Favorito": "Sí" if row.get("Favorito") else "No",
-                    "Nota": row.get("Nota", "")
-                })
-
-    if excel_data:
-        st.markdown("### 📥 Exportar todas las listas")
+    if st.button("📥 Descargar todas las listas en Excel"):
         buffer = BytesIO()
-        df_export = pd.DataFrame(excel_data)
-        df_export.to_excel(buffer, index=False, engine='openpyxl')
+        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
+            for nombre, contactos in listas.items():
+                df_lista = st.session_state.usuario_data["bd"].query("`Nombre completo` in @contactos")
+                df_lista.to_excel(writer, sheet_name=nombre[:31], index=False)
         buffer.seek(0)
         st.download_button(
-            label="Descargar archivo Excel",
+            label="Descargar Excel",
             data=buffer,
-            file_name="listas_completas.xlsx",
+            file_name="listas_contactos.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
         )
 
 def guardar_usuario_data():
+    if "usuario" not in st.session_state:
+        return  # No hay sesión iniciada, no se guarda
+
     user_file = f"data/usuarios/{st.session_state.usuario}.json"
     os.makedirs(os.path.dirname(user_file), exist_ok=True)
     data = {
