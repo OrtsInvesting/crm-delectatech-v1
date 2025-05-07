@@ -8,31 +8,40 @@ def mostrar():
     if "usuario_data" not in st.session_state:
         st.session_state.usuario_data = {"bd": pd.DataFrame(), "listas": {}, "uploads": []}
 
-    st.title("📚 Mis Listas")
-
-    if not st.session_state.usuario_data["listas"]:
-        st.info("No tienes listas creadas todavía.")
+    if "usuario" not in st.session_state:
+        st.warning("Debes iniciar sesión para ver tus listas.")
         return
+
+    st.title("📚 Mis Listas")
 
     listas = st.session_state.usuario_data["listas"]
 
+    if not listas:
+        st.info("No tienes listas creadas todavía.")
+        return
+
     for lista, contactos in listas.items():
         with st.expander(f"📋 {lista} ({len(contactos)} contactos)"):
-            if contactos:
-                df_contactos = st.session_state.usuario_data["bd"].query("`Nombre completo` in @contactos")
-                st.dataframe(df_contactos[[
-                    "Nombre completo", "Cargo", "Empresa", "Email", "Estado", "Comentario", "Favorito"
-                ]])
-            else:
-                st.write("(Lista vacía)")
+            df = st.session_state.usuario_data["bd"]
+            df_lista = df[df["Nombre completo"].isin(contactos)]
+            st.dataframe(df_lista[["Nombre completo", "Cargo", "Empresa", "LinkedIn"]])
+
+            if st.button(f"🗑️ Borrar lista '{lista}'", key=f"borrar_{lista}"):
+                del st.session_state.usuario_data["listas"][lista]
+                guardar_usuario_data()
+                st.success(f"Lista '{lista}' eliminada.")
+                st.rerun()
 
     if st.button("📥 Descargar todas las listas en Excel"):
         buffer = BytesIO()
-        with pd.ExcelWriter(buffer, engine='openpyxl') as writer:
-            for nombre, contactos in listas.items():
-                df_lista = st.session_state.usuario_data["bd"].query("`Nombre completo` in @contactos")
-                df_lista.to_excel(writer, sheet_name=nombre[:31], index=False)
+        excel_writer = pd.ExcelWriter(buffer, engine='openpyxl')
+        for lista, contactos in listas.items():
+            df = st.session_state.usuario_data["bd"]
+            df_lista = df[df["Nombre completo"].isin(contactos)]
+            df_lista.to_excel(excel_writer, sheet_name=lista[:31], index=False)
+        excel_writer.close()
         buffer.seek(0)
+
         st.download_button(
             label="Descargar Excel",
             data=buffer,
@@ -42,7 +51,7 @@ def mostrar():
 
 def guardar_usuario_data():
     if "usuario" not in st.session_state:
-        return  # No hay sesión iniciada, no se guarda
+        return
 
     user_file = f"data/usuarios/{st.session_state.usuario}.json"
     os.makedirs(os.path.dirname(user_file), exist_ok=True)
